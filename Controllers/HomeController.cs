@@ -8,34 +8,39 @@ namespace CaronteCHK.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
-
         public IActionResult Index()
         {
             using (CaronteSqlContext modelDB = new CaronteSqlContext())
             {
-                
+                var user = modelDB.Users.FirstOrDefault(i => i.UserName == "rootkit");
+                Console.WriteLine(user);
             }
 
             return View();
         }
 
-        
-
-        public IActionResult Privacy()
+        [HttpPost]
+        public ActionResult loginAuth(string username, string password)
         {
-            return View();
-        }
+            try
+            {
+                using (CaronteSqlContext modelDB = new CaronteSqlContext())
+                {
+                    var user = modelDB.Users
+                        .SingleOrDefault(u => u.UserName == username && u.Pass == password);
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+                    if (user != null)
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+
+                    return View();
+                }
+            }
+            catch (Exception ex)
+            {
+                return View();
+            }
         }
     }
 }
